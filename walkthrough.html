@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Walkthrough — Karl Abbott at Red Hat Summit 2026</title>
+    <meta name="description" content="An interactive chapter-by-chapter walkthrough of Karl Abbott's Red Hat Summit 2026 talk on deploying to RHEL 10 on Azure with GitHub Copilot CLI.">
+    <meta property="og:title" content="Interactive Walkthrough — Karl Abbott at Red Hat Summit 2026">
+    <meta property="og:description" content="Scroll through the slides, audio, demos, and takeaways from Karl Abbott's Red Hat Summit 2026 session.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="og-image.png">
+    <meta name="theme-color" content="#0d1117">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface-strong: #0f1722;
+            --surface-soft: rgba(22, 27, 34, 0.72);
+            --text: #e6edf3;
+            --text-soft: #c9d1d9;
+            --text-dim: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #7ee787;
+            --accent-orange: #f0883e;
+            --border: #30363d;
+            --shadow: 0 24px 60px rgba(1, 4, 9, 0.32);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+            --content-width: 1200px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top, rgba(88, 166, 255, 0.12), transparent 28%),
+                linear-gradient(180deg, #0d1117 0%, #0b1118 36%, #0d1117 100%);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.65;
+        }
+
+        a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #79c0ff;
+        }
+
+        img,
+        video {
+            max-width: 100%;
+            display: block;
+        }
+
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95em;
+            padding: 0.1rem 0.35rem;
+            border-radius: 6px;
+            background: rgba(110, 118, 129, 0.16);
+            color: var(--text);
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(14px);
+            background: rgba(13, 17, 23, 0.82);
+            border-bottom: 1px solid rgba(48, 54, 61, 0.78);
+        }
+
+        .topbar-inner {
+            width: min(calc(100% - 2rem), calc(var(--content-width) + 120px));
+            margin: 0 auto;
+            padding: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .back-link,
+        .ghost-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.7rem 1rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(22, 27, 34, 0.9);
+            color: var(--text-soft);
+            transition: border-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
+        }
+
+        .back-link:hover,
+        .ghost-link:hover {
+            border-color: var(--accent-blue);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            min-width: 0;
+        }
+
+        .brand-lockup img {
+            height: 34px;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .brand-text {
+            min-width: 0;
+        }
+
+        .brand-text span {
+            display: block;
+        }
+
+        .brand-eyebrow {
+            color: var(--text-dim);
+            font-size: 0.78rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .brand-title {
+            color: var(--text);
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-nav {
+            position: fixed;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 40;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .progress-rail {
+            position: absolute;
+            inset: 0 auto 0 50%;
+            width: 2px;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, rgba(48, 54, 61, 0), rgba(48, 54, 61, 1), rgba(48, 54, 61, 0));
+            z-index: -1;
+        }
+
+        .progress-dot {
+            width: 2.4rem;
+            height: 2.4rem;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: rgba(22, 27, 34, 0.92);
+            color: var(--text-dim);
+            display: grid;
+            place-items: center;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.8rem;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .progress-dot:hover {
+            transform: scale(1.06);
+            border-color: var(--accent-blue);
+            color: var(--text);
+        }
+
+        .progress-dot.is-complete {
+            color: var(--accent-green);
+            border-color: rgba(126, 231, 135, 0.45);
+        }
+
+        .progress-dot.is-active {
+            color: var(--bg);
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            border-color: transparent;
+            box-shadow: 0 0 0 8px rgba(88, 166, 255, 0.12);
+        }
+
+        main {
+            width: min(calc(100% - 2rem), var(--content-width));
+            margin: 0 auto;
+            padding: 2rem 0 5rem;
+        }
+
+        .hero {
+            padding: 3rem 0 2.25rem;
+        }
+
+        .hero-card,
+        .section-panel {
+            background: linear-gradient(180deg, rgba(22, 27, 34, 0.98), rgba(15, 23, 34, 0.98));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+        }
+
+        .hero-card {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.85fr);
+            gap: 2rem;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            isolation: isolate;
+        }
+
+        .hero-card::after {
+            content: '';
+            position: absolute;
+            inset: auto -120px -120px auto;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(126, 231, 135, 0.22), transparent 70%);
+            z-index: -1;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.45rem 0.8rem;
+            margin-bottom: 1rem;
+            border-radius: 999px;
+            border: 1px solid rgba(88, 166, 255, 0.28);
+            background: rgba(88, 166, 255, 0.08);
+            color: var(--accent-blue);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 4vw, 3.8rem);
+            line-height: 1.08;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #58a6ff 0%, #7ee787 55%, #f0883e 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-summary {
+            color: var(--text-soft);
+            font-size: 1.08rem;
+            max-width: 58ch;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-meta,
+        .hero-highlights {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-pill,
+        .highlight-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.55rem 0.8rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(13, 17, 23, 0.55);
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .highlight-pill strong {
+            color: var(--text);
+        }
+
+        .hero-aside {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .speaker-card,
+        .hero-note {
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: rgba(13, 17, 23, 0.5);
+            padding: 1.1rem;
+        }
+
+        .speaker-card {
+            display: grid;
+            grid-template-columns: 88px 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .speaker-card img {
+            width: 88px;
+            height: 88px;
+            object-fit: cover;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+        }
+
+        .speaker-card strong,
+        .hero-note strong {
+            display: block;
+            color: var(--text);
+            margin-bottom: 0.2rem;
+        }
+
+        .speaker-card span,
+        .hero-note p {
+            color: var(--text-soft);
+            font-size: 0.95rem;
+        }
+
+        .hero-note {
+            border-left: 3px solid var(--accent-orange);
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem 0 0;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(88, 166, 255, 0.4);
+            background: transparent;
+            color: var(--accent-blue);
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .hero-cta:hover,
+        .hero-cta:focus-visible,
+        .hero-cta.is-active {
+            color: #79c0ff;
+            border-color: rgba(121, 192, 255, 0.65);
+            background: rgba(88, 166, 255, 0.08);
+            transform: translateY(-1px);
+            outline: none;
+        }
+
+        .play-all-indicator {
+            position: fixed;
+            left: 50%;
+            bottom: 1.25rem;
+            transform: translateX(-50%) translateY(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.85rem;
+            width: min(92vw, 420px);
+            padding: 0.7rem 0.9rem;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(13, 17, 23, 0.96);
+            box-shadow: 0 18px 40px rgba(1, 4, 9, 0.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 80;
+        }
+
+        .play-all-indicator.is-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .play-all-meta {
+            min-width: 0;
+            display: grid;
+        }
+
+        .play-all-label {
+            color: var(--text-dim);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .play-all-title {
+            color: var(--text);
+            font-size: 0.92rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .play-all-phase {
+            color: var(--accent-blue);
+            font-size: 0.78rem;
+        }
+
+        .play-all-stop {
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: rgba(22, 27, 34, 0.9);
+            color: var(--text-soft);
+            font: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            padding: 0.45rem 0.85rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+        }
+
+        .play-all-stop:hover,
+        .play-all-stop:focus-visible {
+            color: var(--text);
+            border-color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.08);
+            outline: none;
+        }
+
+        .story-section {
+            scroll-margin-top: 6rem;
+            padding: 1rem 0 2rem;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .story-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-panel {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: minmax(0, 7fr) minmax(260px, 3fr);
+            grid-template-rows: auto auto auto;
+            gap: 0 1.5rem;
+            align-content: start;
+        }
+
+        .section-header {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .slide-stack {
+            grid-column: 1;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-self: start;
+        }
+
+        .slide-card img {
+            display: block;
+        }
+
+        /* --- Media Tabs (slide/video toggle) --- */
+        .media-container {
+            grid-column: 1;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+        }
+
+        .media-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 0.5rem;
+            align-self: start;
+            height: auto;
+        }
+
+        .media-tab {
+            padding: 0.35rem 0.85rem;
+            font-size: 0.75rem;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-weight: 600;
+            color: var(--text-dim);
+            background: transparent;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1;
+        }
+
+        .media-tab:first-child {
+            border-radius: 6px 0 0 6px;
+        }
+
+        .media-tab:last-child {
+            border-radius: 0 6px 6px 0;
+            border-left: none;
+        }
+
+        .media-tab.active {
+            color: var(--accent-blue);
+            background: rgba(88, 166, 255, 0.1);
+            border-color: rgba(88, 166, 255, 0.4);
+        }
+
+        .media-tab:last-child.active {
+            border-left: 1px solid rgba(88, 166, 255, 0.4);
+        }
+
+        .media-pane {
+            display: none;
+        }
+
+        .media-pane.active {
+            display: block;
+        }
+
+        .section-right {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding-right: 0.25rem;
+        }
+
+        .section-right::-webkit-scrollbar {
+            width: 4px;
+        }
+        .section-right::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .section-right::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        .section-footer {
+            grid-column: 1 / -1;
+            margin-top: 1rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(1.8rem, 3vw, 2.4rem);
+            line-height: 1.12;
+            letter-spacing: -0.03em;
+            margin-top: 0.45rem;
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-green);
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .section-badge {
+            padding: 0.45rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(240, 136, 62, 0.28);
+            background: rgba(240, 136, 62, 0.08);
+            color: var(--accent-orange);
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .slide-stack {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .slide-stack[data-count="2"] {
+            /* stacked in sidebar, not side-by-side */
+        }
+
+        .slide-stack[data-count="3"] {
+            /* stacked in sidebar */
+        }
+
+        .slide-card,
+        .video-card,
+        .resource-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: rgba(13, 17, 23, 0.55);
+        }
+
+        .slide-card img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            background: #0a0e14;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .slide-card img:hover {
+            opacity: 0.85;
+        }
+
+        /* --- Slide Modal --- */
+        .slide-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(1, 4, 9, 0.92);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+
+        .slide-modal.is-open {
+            display: flex;
+        }
+
+        .slide-modal img {
+            max-width: 92vw;
+            max-height: 88vh;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+        }
+
+        .slide-modal-close {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .slide-modal-close:hover {
+            background: var(--accent-blue);
+            color: var(--bg);
+        }
+
+        .slide-card figcaption,
+        .video-meta,
+        .resource-card h3,
+        .resource-card p,
+        .resource-links a {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .slide-card figcaption {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.75rem 0.95rem;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(48, 54, 61, 0.85);
+        }
+
+        .audio-player {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.75rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: rgba(13, 17, 23, 0.72);
+        }
+
+        .audio-player.is-active {
+            border-color: rgba(88, 166, 255, 0.55);
+            box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.12) inset;
+        }
+
+        .audio-toggle {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            border: 1px solid rgba(88, 166, 255, 0.45);
+            background: linear-gradient(180deg, rgba(88, 166, 255, 0.2), rgba(88, 166, 255, 0.08));
+            color: var(--accent-blue);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .audio-toggle svg {
+            width: 1.05rem;
+            height: 1.05rem;
+            fill: currentColor;
+            pointer-events: none;
+        }
+            background: linear-gradient(180deg, rgba(88, 166, 255, 0.2), rgba(88, 166, 255, 0.08));
+            color: var(--accent-blue);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .audio-toggle:hover {
+            transform: translateY(-1px);
+            border-color: var(--accent-blue);
+            color: var(--text);
+        }
+
+        .audio-toggle.is-playing {
+            background: linear-gradient(135deg, var(--accent-blue), #79c0ff);
+            color: var(--bg);
+            border-color: transparent;
+        }
+
+        .audio-toggle svg {
+            width: 1.05rem;
+            height: 1.05rem;
+            fill: currentColor;
+        }
+
+        .audio-copy {
+            display: none;
+        }
+
+        .audio-copy span {
+            display: block;
+            color: var(--text-dim);
+            font-size: 0.76rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .audio-copy strong {
+            color: var(--text);
+            font-size: 0.98rem;
+            font-weight: 600;
+        }
+
+        .audio-progress {
+            flex: 1;
+            height: 0.35rem;
+            border-radius: 999px;
+            background: rgba(48, 54, 61, 0.9);
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            min-width: 60px;
+        }
+
+        .audio-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            border-radius: inherit;
+        }
+
+        .audio-time {
+            min-width: 3rem;
+            text-align: right;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            color: var(--text-soft);
+            font-size: 0.78rem;
+        }
+
+        .section-body {
+            color: var(--text-soft);
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .section-body p + p {
+            margin-top: 0.6rem;
+        }
+
+        .section-body strong {
+            color: var(--text);
+        }
+
+        .video-wrap {
+            margin-top: 1.4rem;
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .video-card video, .video-card iframe {
+            width: 100%;
+            background: #000;
+            aspect-ratio: 16 / 9;
+        }
+
+        .video-meta {
+            padding: 0.85rem 0.95rem;
+            border-top: 1px solid rgba(48, 54, 61, 0.85);
+            color: var(--text-soft);
+        }
+
+        .video-meta strong {
+            display: block;
+            color: var(--text);
+            margin-bottom: 0.2rem;
+        }
+
+        .resource-card {
+            margin-top: 1.4rem;
+            padding: 1rem;
+        }
+
+        .resource-card h3 {
+            color: var(--text);
+            margin-bottom: 0.45rem;
+            font-size: 1rem;
+        }
+
+        .resource-card p {
+            color: var(--text-soft);
+            margin-bottom: 0.75rem;
+        }
+
+        .resource-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+        }
+
+        .resource-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.68rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(22, 27, 34, 0.7);
+            color: var(--text-soft);
+            transition: border-color 0.2s ease, transform 0.2s ease, color 0.2s ease;
+        }
+
+        .resource-links a:hover {
+            border-color: var(--accent-green);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+
+        .section-footer {
+            margin-top: 1.6rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(48, 54, 61, 0.85);
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.85rem 1rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(13, 17, 23, 0.6);
+            color: var(--text-soft);
+            min-width: 180px;
+            transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            transform: translateY(-1px);
+            border-color: var(--accent-blue);
+            color: var(--text);
+        }
+
+        .footer-link small {
+            display: block;
+            color: var(--text-dim);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .footer-link strong {
+            display: block;
+            font-size: 0.96rem;
+            color: inherit;
+        }
+
+        .footer-link.is-next {
+            margin-left: auto;
+            text-align: right;
+            justify-content: flex-end;
+        }
+
+        .footer-link.is-next small,
+        .footer-link.is-next strong {
+            width: 100%;
+        }
+
+        @media (max-width: 1100px) {
+            .progress-nav {
+                left: 0.85rem;
+            }
+
+            main {
+                width: min(calc(100% - 3.8rem), var(--content-width));
+                margin-left: 3.25rem;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .topbar-inner {
+                width: min(calc(100% - 1.25rem), calc(var(--content-width) + 40px));
+                padding: 0.85rem 0;
+            }
+
+            .brand-text {
+                display: none;
+            }
+
+            .hero-card {
+                grid-template-columns: 1fr;
+            }
+
+            .slide-stack[data-count="2"],
+            .slide-stack[data-count="3"] {
+                grid-template-columns: 1fr;
+            }
+
+            .audio-player {
+                grid-template-columns: auto 1fr auto;
+                grid-template-areas:
+                    "toggle copy time"
+                    "progress progress progress";
+            }
+
+            .audio-toggle { grid-area: toggle; }
+            .audio-copy { grid-area: copy; }
+            .audio-time { grid-area: time; }
+            .audio-progress { grid-area: progress; }
+
+            .section-footer {
+                flex-direction: column;
+            }
+
+            .footer-link,
+            .footer-link.is-next {
+                width: 100%;
+                margin-left: 0;
+                text-align: left;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .topbar-inner {
+                flex-wrap: wrap;
+            }
+
+            .back-link,
+            .ghost-link {
+                width: 100%;
+                justify-content: center;
+            }
+
+            main {
+                width: min(calc(100% - 1rem), var(--content-width));
+                margin: 0 auto;
+                padding-bottom: 6rem;
+            }
+
+            .progress-nav {
+                left: 50%;
+                top: auto;
+                bottom: 0.85rem;
+                transform: translateX(-50%);
+                flex-direction: row;
+                gap: 0.45rem;
+                padding: 0.45rem 0.6rem;
+                border: 1px solid rgba(48, 54, 61, 0.85);
+                border-radius: 999px;
+                background: rgba(13, 17, 23, 0.92);
+                backdrop-filter: blur(14px);
+                max-width: calc(100vw - 1rem);
+                overflow-x: auto;
+            }
+
+            .progress-nav::-webkit-scrollbar {
+                display: none;
+            }
+
+            .progress-rail {
+                display: none;
+            }
+
+            .progress-dot {
+                width: 2rem;
+                height: 2rem;
+                flex: 0 0 auto;
+                font-size: 0.72rem;
+            }
+
+            .hero-card,
+            .section-panel {
+                padding: 1.15rem;
+                border-radius: 20px;
+                grid-template-columns: 1fr;
+            }
+
+            .slide-stack {
+                position: static;
+                grid-column: 1;
+                grid-row: auto;
+            }
+
+            .section-right {
+                grid-column: 1;
+                grid-row: auto;
+            }
+
+            .section-footer {
+                grid-column: 1;
+            }
+
+            .speaker-card {
+                grid-template-columns: 72px 1fr;
+            }
+
+            .speaker-card img {
+                width: 72px;
+                height: 72px;
+                border-radius: 14px;
+            }
+
+            h1 {
+                font-size: clamp(2rem, 10vw, 2.8rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="back-link" href="index.html">← Back to landing page</a>
+            <div class="brand-lockup">
+                <div class="brand-text">
+                    <span class="brand-eyebrow">Red Hat Summit 2026</span>
+                    <span class="brand-title">Interactive Walkthrough</span>
+                </div>
+            </div>
+            <a class="ghost-link" href="#section-14">Jump to closing</a>
+        </div>
+    </header>
+
+    <nav class="progress-nav" aria-label="Walkthrough section progress">
+        <span class="progress-rail" aria-hidden="true"></span>
+        <a class="progress-dot" href="#section-1" data-target="section-1" aria-label="Section 1">01</a>
+        <a class="progress-dot" href="#section-2" data-target="section-2" aria-label="Section 2">02</a>
+        <a class="progress-dot" href="#section-3" data-target="section-3" aria-label="Section 3">03</a>
+        <a class="progress-dot" href="#section-4" data-target="section-4" aria-label="Section 4">04</a>
+        <a class="progress-dot" href="#section-5" data-target="section-5" aria-label="Section 5">05</a>
+        <a class="progress-dot" href="#section-6" data-target="section-6" aria-label="Section 6">06</a>
+        <a class="progress-dot" href="#section-7" data-target="section-7" aria-label="Section 7">07</a>
+        <a class="progress-dot" href="#section-8" data-target="section-8" aria-label="Section 8">08</a>
+        <a class="progress-dot" href="#section-9" data-target="section-9" aria-label="Section 9">09</a>
+        <a class="progress-dot" href="#section-10" data-target="section-10" aria-label="Section 10">10</a>
+        <a class="progress-dot" href="#section-11" data-target="section-11" aria-label="Section 11">11</a>
+        <a class="progress-dot" href="#section-12" data-target="section-12" aria-label="Section 12">12</a>
+        <a class="progress-dot" href="#section-13" data-target="section-13" aria-label="Section 13">13</a>
+        <a class="progress-dot" href="#section-14" data-target="section-14" aria-label="Section 14">14</a>
+    </nav>
+
+    <main>
+        <section class="hero" id="top">
+            <div class="hero-card">
+                <div>
+                    <div class="eyebrow">RHEL 10 • Azure • Copilot CLI • Ansible</div>
+                    <h1>One Prompt. Two Blank VMs. Here’s What Happened.</h1>
+                    <p class="hero-summary">A chapter-by-chapter interactive retelling of the talk: the slides, the narration, the live demos, and the hard-earned lessons from letting an AI agent loose on real infrastructure.</p>
+                    <div class="hero-meta">
+                        <span class="meta-pill">14 sections</span>
+                        <span class="meta-pill">14 audio tracks</span>
+                        <span class="meta-pill">3 embedded demo videos</span>
+                    </div>
+                    <div class="hero-highlights">
+                        <span class="highlight-pill"><strong>Theme:</strong> rhs.99b.org dark mode</span>
+                        <span class="highlight-pill"><strong>Format:</strong> scroll, listen, and explore</span>
+                    </div>
+                </div>
+                <div class="hero-aside">
+                    <div class="speaker-card">
+                        <img src="karl.jpeg" alt="Karl Abbott portrait">
+                        <div>
+                            <strong>Karl Abbott</strong>
+                            <span>Product Manager at Microsoft<br>Formerly 16 years at Red Hat</span>
+                        </div>
+                    </div>
+                    <div class="hero-note">
+                        <strong>How to use this page</strong>
+                        <p>Follow the left-side progress dots, play each section’s narration, and use the prev/next links to move chapter by chapter through the full story.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a class="hero-cta" href="#section-1">Begin → Chapter 01: I Know Where the Booleans Are</a>
+                <button class="hero-cta" type="button" data-play-all aria-pressed="false">▶ Play All</button>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-1">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 01</div>
+                        <h2>I Know Where the Booleans Are</h2>
+                    </div>
+                    <span class="section-badge">Opening</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide1.JPG" alt="Slide 1 from Karl Abbott's Red Hat Summit 2026 talk">
+                        <figcaption><span>Slide 1</span><span>16 years at Red Hat. Now at Microsoft.</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/01-i-know-where-the-booleans-are.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>I’m Karl Abbott. I’m a product manager at Microsoft. Before that, I spent 16 years at Red Hat. So yes, I know where the SELinux booleans are buried.</p>
+                    <p>At Red Hat Summit 2026, I handed an AI agent a terminal and asked it to deploy a live application to RHEL 10 on Azure. From scratch. No scripts. No runbooks. The audience watched every SSH command, every <code>dnf install</code>, every SELinux denial — and then they played the app on their phones.</p>
+                    <p>It worked, and we all learned something. Even if it didn’t work, we would have learned something still.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#top"><span>↑</span><span><small>Start</small><strong>Back to top</strong></span></a>
+                    <a class="footer-link is-next" href="#section-2"><span><small>Next</small><strong>What Agentic Actually Means</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-2">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 02</div>
+                        <h2>What Agentic Actually Means</h2>
+                    </div>
+                    <span class="section-badge">Framing</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide5.JPG" alt="Slide 5 covering what agentic actually means">
+                        <figcaption><span>Slide 5</span><span>How the agent works</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/02-what-agentic-actually-means.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>This isn’t the autocomplete you know from your editor. An agentic system takes a high-level goal, breaks it into steps, executes them with real tools, reads the output, and adapts when something fails. Copilot CLI lives in your terminal. It uses az CLI, SSH, git, Python, Ansible. Your tools.</p>
+                    <p>But the agent handles the mechanics. The sequencing, the flags, the 15 commands in the right order.</p>
+                    <p>What remains is your judgment. Your technical correctness. Your instinct for when the direction is wrong, even if the output looks fine.</p>
+                    <p>Copilot is an editor and translator, not a thinker. It translates your intent into working infrastructure. The thinking is still yours.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-1"><span>←</span><span><small>Previous</small><strong>I Know Where the Booleans Are</strong></span></a>
+                    <a class="footer-link is-next" href="#section-3"><span><small>Next</small><strong>The Problem</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-3">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 03</div>
+                        <h2>The Problem</h2>
+                    </div>
+                    <span class="section-badge">Context</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide6.JPG" alt="Slide 6 showing the deployment problem">
+                        <figcaption><span>Slide 6</span><span>The runbook problem</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/03-the-problem.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>Deploying even a simple app to RHEL on Azure involves more than a dozen discrete steps, and every one of them has platform-specific knowledge baked in. Anyone who’s tried to follow a generic Linux tutorial on RHEL knows this pain.</p>
+                    <p>We’ve all written runbooks for this, and they’re great on the day you write them. But packages get renamed. Config paths change between RHEL versions. Cloud CLIs add and deprecate flags. Nobody goes and updates the doc.</p>
+                    <p>So what if you could just describe what you want, and let an agent with current knowledge figure out the steps?</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-2"><span>←</span><span><small>Previous</small><strong>What Agentic Actually Means</strong></span></a>
+                    <a class="footer-link is-next" href="#section-4"><span><small>Next</small><strong>The Architecture</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-4">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 04</div>
+                        <h2>The Architecture</h2>
+                    </div>
+                    <span class="section-badge">System design</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide7.JPG" alt="Slide 7 showing the architecture diagram">
+                        <figcaption><span>Slide 7</span><span>Two VMs, one live system</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/04-the-architecture.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>Two RHEL 10 virtual machines in an Azure VNet. The web VM runs Nginx as a reverse proxy to Gunicorn, serving a Flask application. That’s the conference bingo game. The database VM runs PostgreSQL. They talk over a private subnet.</p>
+                    <p>On top of that: DNS with a real domain, TLS from Let’s Encrypt, and an observability pipeline. Azure Monitor Agent on both VMs, collecting syslog and performance counters, feeding into a Log Analytics workspace, visualized through Managed Grafana.</p>
+                    <p>All of this gets configured and deployed in front of you.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-3"><span>←</span><span><small>Previous</small><strong>The Problem</strong></span></a>
+                    <a class="footer-link is-next" href="#section-5"><span><small>Next</small><strong>One Paragraph</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-5">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 05</div>
+                        <h2>One Paragraph</h2>
+                    </div>
+                    <span class="section-badge">Live deployment</span>
+                </div>
+                <div class="video-wrap">
+                    <div class="video-card">
+                        <iframe width="100%" style="aspect-ratio:16/9;" src="https://www.youtube.com/embed/Dc_SR10cBAI?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>
+                        <div class="video-meta"><strong>Demo video</strong><span>The live deployment sequence from the session.</span></div>
+                    </div>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/05-one-paragraph.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>That’s it. One paragraph. No script. No runbook. Let’s see what happens.</p>
+                    <p>If I were doing this by hand, I’d be running <code>dnf search</code> trying to remember if the package is <code>postgresql-server</code> or <code>postgresql16-server</code> on RHEL 10, then doing web searches for the Nginx config path because I can never remember if it’s <code>conf.d</code> or <code>sites-available</code> on a distro. Copilot just knows.</p>
+                    <p>Most AI coding tutorials assume Ubuntu — <code>apt-get</code>, <code>ufw</code>, permissive SELinux, or none. But enterprise customers run RHEL for the support lifecycle, the security posture, FIPS. The gap between “it works in a tutorial environment” and “it works on RHEL in production with SELinux set to enforcing mode” is exactly where teams lose hours. And that’s the gap that Copilot closes.</p>
+                </div>
+
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-4"><span>←</span><span><small>Previous</small><strong>The Architecture</strong></span></a>
+                    <a class="footer-link is-next" href="#section-6"><span><small>Next</small><strong>RHEL-Specific Patterns</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-6">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 06</div>
+                        <h2>RHEL-Specific Patterns</h2>
+                    </div>
+                    <span class="section-badge">Platform knowledge</span>
+                </div>
+                <div class="slide-stack" data-count="2">
+                    <figure class="slide-card">
+                        <img src="slides/Slide10.JPG" alt="Slide 10 covering RHEL-specific patterns">
+                        <figcaption><span>Slide 10</span><span>Runbook versus prompt</span></figcaption>
+                    </figure>
+                    <figure class="slide-card">
+                        <img src="slides/Slide11.JPG" alt="Slide 11 covering RHEL-specific patterns">
+                        <figcaption><span>Slide 11</span><span>One prompt vs. 63 commands</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/06-rhel-specific-patterns.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>Package management is <code>dnf</code>, not <code>apt</code>. Nginx config goes in <code>conf.d</code>, not <code>sites-available</code>. There’s no <code>sites-enabled</code> symlink pattern. SELinux is enforcing by default, which means your Nginx reverse proxy silently fails unless you set <code>httpd_can_network_connect</code>. Firewall is <code>firewall-cmd</code>, not <code>ufw</code>. The service user for web processes is <code>nobody</code>, not <code>www-data</code>.</p>
+                    <p>PostgreSQL on RHEL requires an explicit <code>initdb</code> step before it’ll start. That trips up a lot of people. And here’s a fun one: when you SCP a shell script from a Windows machine, the CRLF line endings make the shebang line invalid, so you get “No such file or directory” on a file that clearly exists.</p>
+                    <p>Every one of those is a place where a generic tutorial would have failed on RHEL. Copilot figured out every one of them.</p>
+                    <p>On the left, the manual runbook. Dozens of commands, platform-specific flags, easy to get wrong. On the right, what I actually typed. One paragraph. Same result.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-5"><span>←</span><span><small>Previous</small><strong>One Paragraph</strong></span></a>
+                    <a class="footer-link is-next" href="#section-7"><span><small>Next</small><strong>Explore with Copilot. Codify with Ansible.</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-7">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 07</div>
+                        <h2>Explore with Copilot. Codify with Ansible.</h2>
+                    </div>
+                    <span class="section-badge">Workflow</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide12.JPG" alt="Slide 12 about exploring with Copilot and codifying with Ansible">
+                        <figcaption><span>Slide 12</span><span>Explore fast, keep the artifact</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/07-explore-codify-ansible.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>Here’s the key idea I want you to take away.</p>
+                    <p>Copilot is great for exploring and building. You iterate, you hit errors, you adapt, you get things working. But once it works, you don’t want to do that again. You want to capture it.</p>
+                    <p>This is where Ansible comes in. After I built the observability stack interactively with Copilot — figuring out Azure Monitor Agent configuration, data collection rules, syslog forwarding, the Grafana setup — I asked Copilot to take everything we’d done and output it as an Ansible playbook. Roles, variables, handlers, the works.</p>
+                    <p>The playbook we’re about to run was literally generated with the same tool you just watched deploy the app. Copilot is the accelerator. Ansible is the artifact. You explore fast, then you codify what works.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-6"><span>←</span><span><small>Previous</small><strong>RHEL-Specific Patterns</strong></span></a>
+                    <a class="footer-link is-next" href="#section-8"><span><small>Next</small><strong>Why Ansible Is Now Even More Important</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-8">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 08</div>
+                        <h2>Why Ansible Is Now Even More Important</h2>
+                    </div>
+                    <span class="section-badge">Determinism</span>
+                </div>
+                <div class="slide-stack" data-count="3">
+                    <figure class="slide-card">
+                        <img src="slides/Slide13.JPG" alt="Slide 13 about Ansible's importance">
+                        <figcaption><span>Slide 13</span><span>The observability stack</span></figcaption>
+                    </figure>
+                    <figure class="slide-card">
+                        <img src="slides/Slide14.JPG" alt="Slide 14 about Ansible's importance">
+                        <figcaption><span>Slide 14</span><span>Structural clarity</span></figcaption>
+                    </figure>
+                    <figure class="slide-card">
+                        <img src="slides/Slide15.JPG" alt="Slide 15 about Ansible's importance">
+                        <figcaption><span>Slide 15</span><span>From one person to the team</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/08-why-ansible-matters-more.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>Some people hear “agentic AI” and think it replaces automation tools like Ansible. It’s the exact opposite. Agentic AI makes Ansible more important.</p>
+                    <p>Agents are non-deterministic. I can give Copilot the same prompt twice, and it might take a different path each time. That’s fine for exploration. It’s actually a strength. But when I need to reproduce this in staging, then production, then for the next team — then I need determinism.</p>
+                    <p>There’s a distinction that matters. Structural clarity versus performative clarity. A successful demo looks good. That’s performative clarity. But Ansible gives you structural clarity — where the system actually holds together. The playbook prevents re-debate about how we got here. It’s in git, it’s reviewed in PRs, and it <strong>is</strong> the documentation.</p>
+                    <p>Idempotent, repeatable, auditable. Those properties matter more, not less, in a world where agentic AI is generating more automation faster than ever.</p>
+                    <p>This is why you don’t ship the agent’s work straight to production. You wait until you have structural clarity. A reviewed, tested playbook before you move. The agent gets you there faster, but the gate is the same.</p>
+                    <p><a href="https://www.microsoft.com/en-us/worklab/work-trend-index" style="color:#58a6ff;">Microsoft’s 2026 Work Trend Index</a> backs this up. Organizational environment matters twice as much as individual skill when it comes to AI impact. The playbook is how one person’s exploration becomes the whole team’s capability.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-7"><span>←</span><span><small>Previous</small><strong>Explore with Copilot. Codify with Ansible.</strong></span></a>
+                    <a class="footer-link is-next" href="#section-9"><span><small>Next</small><strong>What AI Actually Changes</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-9">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 09</div>
+                        <h2>What AI Actually Changes</h2>
+                    </div>
+                    <span class="section-badge">Judgment</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide16.JPG" alt="Slide 16 about what AI actually changes">
+                        <figcaption><span>Slide 16</span><span>Scaffolding versus judgment</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/09-what-ai-actually-changes.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>AI removes the mechanical parts of our work. The drafting, the formatting, the scaffolding, the sequencing. You just saw that in the demo. Copilot handled the tedious investigation loop, the 15-step deployment, the config syntax.</p>
+                    <p>I usually spend the last three weeks before Summit frantically building slides and debugging labs. This year, I had everything done four weeks out. I spent the extra time thinking about whether this talk was actually good. That’s what AI changes.</p>
+                    <p>But what remained — and what mattered more — was my judgment. My technical correctness. My instinct to sense when the direction was wrong, even if the output looked fine. I had to know Linux well enough to evaluate whether what the agent was doing was right.</p>
+                    <p>There’s a sequence that matters. Understanding comes before abstraction. You explore interactively, build understanding of the system, and only then do you abstract into automation. You don’t start with the playbook. You start with the exploration. The playbook comes after.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-8"><span>←</span><span><small>Previous</small><strong>Why Ansible Is Now Even More Important</strong></span></a>
+                    <a class="footer-link is-next" href="#section-10"><span><small>Next</small><strong>The Monitoring Pipeline</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-10">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 10</div>
+                        <h2>The Monitoring Pipeline</h2>
+                    </div>
+                    <span class="section-badge">Observability</span>
+                </div>
+                <div class="video-wrap">
+                    <div class="video-card">
+                        <iframe width="100%" style="aspect-ratio:16/9;" src="https://www.youtube.com/embed/VNBfZDtP97o?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>
+                        <div class="video-meta"><strong>Demo video</strong><span>Monitoring the live app while the audience plays bingo.</span></div>
+                    </div>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/10-the-monitoring-pipeline.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>Syslog messages flowing in, performance counters being graphed, and — because the audience was playing bingo — real PostgreSQL connection activity and Nginx access logs from their phones hitting the app.</p>
+                    <p>Azure Monitor Agent runs natively on RHEL. The data collection rules understand syslog. Grafana speaks KQL. None of this required glue code or workarounds. It’s built together. That’s what co-engineered actually means.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-9"><span>←</span><span><small>Previous</small><strong>What AI Actually Changes</strong></span></a>
+                    <a class="footer-link is-next" href="#section-11"><span><small>Next</small><strong>Something’s Wrong</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-11">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 11</div>
+                        <h2>Something’s Wrong</h2>
+                    </div>
+                    <span class="section-badge">Troubleshooting</span>
+                </div>
+                <div class="video-wrap">
+                    <div class="video-card">
+                        <iframe width="100%" style="aspect-ratio:16/9;" src="https://www.youtube.com/embed/MiKhc3qxUZw?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" frameborder="0" allow="encrypted-media" allowfullscreen></iframe>
+                        <div class="video-meta"><strong>Demo video</strong><span>A real troubleshooting moment on a live server.</span></div>
+                    </div>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/11-somethings-wrong.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>The app was feeling slow. I typed seven words. My app feels really slow. Can you tell me why?</p>
+                    <p>I didn’t tell Copilot what <code>turbo.sh</code> does. It read the source code and reverse-engineered the attack. It found the problem, explained it, and fixed it. That was a real incident on a real server.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-10"><span>←</span><span><small>Previous</small><strong>The Monitoring Pipeline</strong></span></a>
+                    <a class="footer-link is-next" href="#section-12"><span><small>Next</small><strong>The Honest Part</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-12">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 12</div>
+                        <h2>The Honest Part</h2>
+                    </div>
+                    <span class="section-badge">Guardrails</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide19.JPG" alt="Slide 19 for the honest part section">
+                        <figcaption><span>Slide 19</span><span>Trust, but verify</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/12-the-honest-part.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>That felt pretty good, right?</p>
+                    <p>But I’d be doing you a disservice if I left it there, because that was the best case.</p>
+                    <p>Agents are great for exploratory work. Standing up new environments, multi-step configuration, catching platform-specific gotchas you don’t remember, and diagnostics like you just saw. But the danger with AI isn’t that machines think. It’s that we stop thinking because the output looks fine.</p>
+                    <p>Always review what the agent does. Understand the blast radius. Codify with Ansible so you have structural clarity. Not just a demo that worked once. And start in non-production environments. Build trust incrementally.</p>
+                    <p>Not every problem has a clear fix. Sometimes the agent gives you an answer and it looks right. But the real issue is you don’t fully understand the problem yet. And the only way to understand it is to get your hands on it.</p>
+                    <p>I built this because I wanted to understand what this thing actually is. Not the marketing version. The real version. What happens when you hand an AI a terminal and let it loose on real infrastructure. I needed to see it for myself.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-11"><span>←</span><span><small>Previous</small><strong>Something’s Wrong</strong></span></a>
+                    <a class="footer-link is-next" href="#section-13"><span><small>Next</small><strong>Takeaways</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-13">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 13</div>
+                        <h2>Takeaways</h2>
+                    </div>
+                    <span class="section-badge">What to keep</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide20.JPG" alt="Slide 20 with the final takeaways">
+                        <figcaption><span>Slide 20</span><span>Lean in</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/13-takeaways.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>A well-crafted prompt replaces a 50-step runbook. Your code is the source of truth. Let the agent figure out the steps.</p>
+                    <p>Explore with Copilot. Codify with Ansible. Copilot gets you to working fast. Ansible keeps it working forever.</p>
+                    <p>Azure and RHEL is a first-class stack. Co-engineered. Co-supported.</p>
+                    <p>And the one I feel most strongly about? Lean in. AI removes the scaffolding. What remains is judgment, technical correctness, and the instinct to know when something is wrong, even if the output looks fine. Develop those parts of yourself. That’s what the tools cannot replace. And that’s what made me stop worrying about being replaced by them.</p>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-12"><span>←</span><span><small>Previous</small><strong>The Honest Part</strong></span></a>
+                    <a class="footer-link is-next" href="#section-14"><span><small>Next</small><strong>Closing</strong></span><span>→</span></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="story-section" id="section-14">
+            <div class="section-panel">
+                <div class="section-header">
+                    <div>
+                        <div class="section-number">Chapter 14</div>
+                        <h2>Closing</h2>
+                    </div>
+                    <span class="section-badge">Open source</span>
+                </div>
+                <div class="slide-stack" data-count="1">
+                    <figure class="slide-card">
+                        <img src="slides/Slide22.JPG" alt="Slide 22 from the closing section">
+                        <figcaption><span>Slide 22</span><span>Let's connect</span></figcaption>
+                    </figure>
+                </div>
+                <div class="section-right">
+                <div class="audio-player" data-audio-player>
+                    <button class="audio-toggle" type="button" aria-label="Play section audio">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>
+                    </button>
+                    <div class="audio-copy"><span>Listen</span><strong>Section narration</strong></div>
+                    <div class="audio-progress" role="button" tabindex="0" aria-label="Seek section audio"><div class="audio-progress-fill"></div></div>
+                    <div class="audio-time">--:--</div>
+                    <audio preload="metadata" src="audio/14-closing.mp3"></audio>
+                </div>
+                <div class="section-body">
+                    <p>Everything you saw is open source. The app, the monitoring playbook, even the teaser site. It’s all on my GitHub.</p>
+                    <p>The tool is GitHub Copilot CLI. The model that did all of this is Claude Opus. And the VMs were deleted by dinner.</p>
+                    <p>I’m Karl. I spent 16 years at Red Hat, and I’m glad I got to come back to the Red Hat Summit and show you this.</p>
+                </div>
+                <div class="resource-card">
+                    <h3>Links from the talk</h3>
+                    <p>Dig into the app, the monitoring playbook, and Karl’s profile.</p>
+                    <div class="resource-links">
+                        <a href="#" style="color:#58a6ff; font-weight:600;">🚀 Try It Yourself — copy-paste prompts for any Linux distro on Azure (coming soon)</a>
+                        <a href="https://github.com/karlabbott/conference-bingo" target="_blank" rel="noreferrer">github.com/karlabbott/conference-bingo</a>
+                        <a href="https://github.com/karlabbott/wordblitz-monitoring-ansible" target="_blank" rel="noreferrer">github.com/karlabbott/wordblitz-monitoring-ansible</a>
+                        <a href="https://www.linkedin.com/in/karl-abbott" target="_blank" rel="noreferrer">linkedin.com/in/karl-abbott</a>
+                    </div>
+                </div>
+                </div>
+                <div class="section-footer">
+                    <a class="footer-link" href="#section-13"><span>←</span><span><small>Previous</small><strong>Takeaways</strong></span></a>
+                    <a class="footer-link is-next" href="#top"><span><small>Next</small><strong>Back to top</strong></span><span>↑</span></a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const playIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.14v13.72a1 1 0 0 0 1.53.85l10.29-6.86a1 1 0 0 0 0-1.66L9.53 4.29A1 1 0 0 0 8 5.14Z"></path></svg>';
+            const pauseIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.75A.75.75 0 0 1 8.75 5h2.5a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1-.75-.75V5.75Zm7 0A.75.75 0 0 1 15.75 5h2.5a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1-.75-.75V5.75Z"></path></svg>';
+            const sections = Array.from(document.querySelectorAll('.story-section'));
+            const progressDots = Array.from(document.querySelectorAll('.progress-dot'));
+            const players = Array.from(document.querySelectorAll('[data-audio-player]'));
+            const playAllButton = document.querySelector('[data-play-all]');
+            let currentAudio = null;
+            let playAllController = null;
+            let playAllIndicator = null;
+            let playAllCurrentVideo = null;
+
+            function createPlayAllIndicator() {
+                if (playAllIndicator) return playAllIndicator;
+                const indicator = document.createElement('div');
+                indicator.className = 'play-all-indicator';
+                indicator.innerHTML = '<div class="play-all-meta"><span class="play-all-label">Now Playing</span><strong class="play-all-title">Preparing walkthrough</strong><span class="play-all-phase">Audio narration</span></div><button class="play-all-stop" type="button" aria-label="Stop play all">Stop</button>';
+                indicator.querySelector('.play-all-stop').addEventListener('click', () => stopPlayAll());
+                document.body.appendChild(indicator);
+                playAllIndicator = indicator;
+                return indicator;
+            }
+
+            function updatePlayAllButton(active) {
+                if (!playAllButton) return;
+                playAllButton.classList.toggle('is-active', active);
+                playAllButton.setAttribute('aria-pressed', active ? 'true' : 'false');
+                playAllButton.textContent = active ? '■ Stop All' : '▶ Play All';
+            }
+
+            function formatTime(seconds) {
+                if (!Number.isFinite(seconds)) return '--:--';
+                const safe = Math.max(0, Math.floor(seconds));
+                const minutes = Math.floor(safe / 60);
+                const secs = String(safe % 60).padStart(2, '0');
+                return `${minutes}:${secs}`;
+            }
+
+            function setButtonState(button, playing) {
+                button.innerHTML = playing ? pauseIcon : playIcon;
+                button.classList.toggle('is-playing', playing);
+                button.setAttribute('aria-label', playing ? 'Pause section audio' : 'Play section audio');
+            }
+
+            function syncPlayer(player) {
+                const audio = player.querySelector('audio');
+                const button = player.querySelector('.audio-toggle');
+                const fill = player.querySelector('.audio-progress-fill');
+                const time = player.querySelector('.audio-time');
+                const percent = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+                fill.style.width = `${percent}%`;
+                const remaining = audio.duration ? audio.duration - audio.currentTime : NaN;
+                time.textContent = audio.duration ? `-${formatTime(remaining)}` : '--:--';
+                const playing = !audio.paused && !audio.ended;
+                player.classList.toggle('is-active', playing);
+                setButtonState(button, playing);
+            }
+
+            function pauseOtherAudio(except) {
+                players.forEach((player) => {
+                    const audio = player.querySelector('audio');
+                    if (audio !== except) {
+                        audio.pause();
+                        syncPlayer(player);
+                    }
+                });
+            }
+
+            function pauseAllVideos(except) {
+                document.querySelectorAll('video').forEach((video) => {
+                    if (video !== except) {
+                        video.pause();
+                    }
+                });
+            }
+
+            function updatePlayAllIndicator(section, phase) {
+                const indicator = createPlayAllIndicator();
+                const chapter = section.querySelector('.section-number')?.textContent.trim() || section.id;
+                const title = section.querySelector('h2')?.textContent.trim() || 'Walkthrough section';
+                indicator.querySelector('.play-all-title').textContent = `${chapter} — ${title}`;
+                indicator.querySelector('.play-all-phase').textContent = phase;
+                indicator.classList.add('is-visible');
+            }
+
+            function waitForSignal(ms, signal) {
+                return new Promise((resolve, reject) => {
+                    const timer = window.setTimeout(() => {
+                        cleanup();
+                        resolve();
+                    }, ms);
+
+                    function cleanup() {
+                        window.clearTimeout(timer);
+                        if (signal) {
+                            signal.removeEventListener('abort', onAbort);
+                        }
+                    }
+
+                    function onAbort() {
+                        cleanup();
+                        reject(new DOMException('Aborted', 'AbortError'));
+                    }
+
+                    if (signal) {
+                        if (signal.aborted) {
+                            onAbort();
+                            return;
+                        }
+                        signal.addEventListener('abort', onAbort, { once: true });
+                    }
+                });
+            }
+
+            function waitForMediaEnd(media, signal) {
+                return new Promise((resolve, reject) => {
+                    if (media.ended) {
+                        resolve();
+                        return;
+                    }
+
+                    function cleanup() {
+                        media.removeEventListener('ended', onDone);
+                        media.removeEventListener('error', onDone);
+                        if (signal) {
+                            signal.removeEventListener('abort', onAbort);
+                        }
+                    }
+
+                    function onDone() {
+                        cleanup();
+                        resolve();
+                    }
+
+                    function onAbort() {
+                        cleanup();
+                        reject(new DOMException('Aborted', 'AbortError'));
+                    }
+
+                    media.addEventListener('ended', onDone, { once: true });
+                    media.addEventListener('error', onDone, { once: true });
+
+                    if (signal) {
+                        if (signal.aborted) {
+                            onAbort();
+                            return;
+                        }
+                        signal.addEventListener('abort', onAbort, { once: true });
+                    }
+                });
+            }
+
+            function stopPlayAll() {
+                if (playAllController) {
+                    playAllController.abort();
+                    playAllController = null;
+                }
+                pauseAllVideos();
+                playAllCurrentVideo = null;
+                if (playAllIndicator) {
+                    playAllIndicator.remove();
+                    playAllIndicator = null;
+                }
+                updatePlayAllButton(false);
+                if (currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                }
+                players.forEach((player) => syncPlayer(player));
+            }
+
+            async function startPlayAll() {
+                if (playAllController) {
+                    stopPlayAll();
+                    return;
+                }
+
+                pauseAllVideos();
+                if (currentAudio && !currentAudio.paused) {
+                    currentAudio.pause();
+                }
+                players.forEach((player) => syncPlayer(player));
+
+                const controller = new AbortController();
+                const { signal } = controller;
+                playAllController = controller;
+                updatePlayAllButton(true);
+                createPlayAllIndicator().classList.add('is-visible');
+
+                try {
+                    for (const section of sections) {
+                        const player = section.querySelector('[data-audio-player]');
+                        const audio = player ? player.querySelector('audio') : null;
+                        const video = section.querySelector('.section-panel video');
+
+                        updatePlayAllIndicator(section, 'Audio narration');
+                        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        await waitForSignal(400, signal);
+
+                        if (audio) {
+                            pauseAllVideos();
+                            pauseOtherAudio(audio);
+                            audio.currentTime = 0;
+                            currentAudio = audio;
+                            syncPlayer(player);
+                            await audio.play();
+                            await waitForMediaEnd(audio, signal);
+                        }
+
+                        if (video) {
+                            updatePlayAllIndicator(section, 'Demo video');
+                            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            await waitForSignal(250, signal);
+                            pauseAllVideos(video);
+                            playAllCurrentVideo = video;
+                            video.currentTime = 0;
+                            await video.play();
+                            await waitForMediaEnd(video, signal);
+                            playAllCurrentVideo = null;
+                        }
+
+                        await waitForSignal(1000, signal);
+                    }
+                } catch (error) {
+                    if (!error || error.name !== 'AbortError') {
+                        console.error('Play All failed', error);
+                        stopPlayAll();
+                        return;
+                    }
+                } finally {
+                    if (playAllController === controller) {
+                        stopPlayAll();
+                    }
+                }
+            }
+
+            players.forEach((player) => {
+                const audio = player.querySelector('audio');
+                const button = player.querySelector('.audio-toggle');
+                const progress = player.querySelector('.audio-progress');
+
+                setButtonState(button, false);
+
+                button.addEventListener('click', () => {
+                    if (playAllController) {
+                        stopPlayAll();
+                    }
+                    if (audio.paused) {
+                        pauseOtherAudio(audio);
+                        audio.play();
+                        currentAudio = audio;
+                    } else {
+                        audio.pause();
+                    }
+                    syncPlayer(player);
+                });
+
+                progress.addEventListener('click', (event) => {
+                    if (playAllController) {
+                        stopPlayAll();
+                    }
+                    if (!audio.duration) return;
+                    const rect = progress.getBoundingClientRect();
+                    const ratio = Math.min(Math.max((event.clientX - rect.left) / rect.width, 0), 1);
+                    audio.currentTime = ratio * audio.duration;
+                    syncPlayer(player);
+                });
+
+                progress.addEventListener('keydown', (event) => {
+                    if (playAllController) {
+                        stopPlayAll();
+                    }
+                    if (!audio.duration) return;
+                    const jump = Math.max(audio.duration * 0.05, 5);
+                    if (event.key === 'ArrowRight') {
+                        audio.currentTime = Math.min(audio.currentTime + jump, audio.duration);
+                        syncPlayer(player);
+                        event.preventDefault();
+                    }
+                    if (event.key === 'ArrowLeft') {
+                        audio.currentTime = Math.max(audio.currentTime - jump, 0);
+                        syncPlayer(player);
+                        event.preventDefault();
+                    }
+                });
+
+                ['loadedmetadata', 'timeupdate', 'pause', 'ended'].forEach((eventName) => {
+                    audio.addEventListener(eventName, () => syncPlayer(player));
+                });
+
+                audio.addEventListener('play', () => {
+                    if (playAllController && currentAudio && currentAudio !== audio) {
+                        stopPlayAll();
+                    }
+                    pauseOtherAudio(audio);
+                    currentAudio = audio;
+                    syncPlayer(player);
+                });
+            });
+
+            document.querySelectorAll('video').forEach((video) => {
+                video.addEventListener('play', () => {
+                    if (playAllController && video !== playAllCurrentVideo) {
+                        stopPlayAll();
+                    }
+                    if (currentAudio && !currentAudio.paused) {
+                        currentAudio.pause();
+                    }
+                });
+
+                video.addEventListener('ended', () => {
+                    if (playAllCurrentVideo === video) {
+                        playAllCurrentVideo = null;
+                    }
+                });
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach((link) => {
+                link.addEventListener('click', () => {
+                    if (playAllController) {
+                        stopPlayAll();
+                    }
+                    if (currentAudio && !currentAudio.paused) {
+                        currentAudio.pause();
+                        players.forEach((player) => syncPlayer(player));
+                    }
+                });
+            });
+
+            if (playAllButton) {
+                playAllButton.addEventListener('click', startPlayAll);
+            }
+
+            window.addEventListener('hashchange', () => {
+                if (playAllController) {
+                    stopPlayAll();
+                }
+            });
+
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                threshold: 0.16,
+                rootMargin: '0px 0px -8% 0px'
+            });
+
+            sections.forEach((section) => revealObserver.observe(section));
+
+            function updateActiveSection() {
+                const viewportAnchor = window.innerHeight * 0.38;
+                let activeIndex = 0;
+
+                sections.forEach((section, index) => {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= viewportAnchor) {
+                        activeIndex = index;
+                    }
+                });
+
+                progressDots.forEach((dot, index) => {
+                    const isActive = index === activeIndex;
+                    dot.classList.toggle('is-active', isActive);
+                    dot.classList.toggle('is-complete', index < activeIndex);
+                    if (isActive) {
+                        dot.setAttribute('aria-current', 'step');
+                    } else {
+                        dot.removeAttribute('aria-current');
+                    }
+                });
+            }
+
+            updateActiveSection();
+            window.addEventListener('scroll', updateActiveSection, { passive: true });
+
+            // --- Media Tabs (slide/video toggle) ---
+            document.querySelectorAll('.media-tabs').forEach(tabBar => {
+                const section = tabBar.closest('.section-panel') || tabBar.parentElement;
+                const tabs = tabBar.querySelectorAll('.media-tab');
+                const panes = section.querySelectorAll('.media-pane');
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const target = tab.dataset.pane;
+                        tabs.forEach(t => t.classList.toggle('active', t === tab));
+                        panes.forEach(p => {
+                            const isTarget = p.dataset.paneId === target;
+                            p.classList.toggle('active', isTarget);
+                            // Pause video when switching away
+                            if (!isTarget) {
+                                const vid = p.querySelector('video');
+                                if (vid) { vid.pause(); }
+                            }
+                        });
+                    });
+                });
+            });
+
+            window.addEventListener('resize', updateActiveSection);
+
+            // --- Slide Modal ---
+            const modal = document.getElementById('slideModal');
+            const modalImg = modal.querySelector('img');
+            const modalClose = modal.querySelector('.slide-modal-close');
+
+            document.querySelectorAll('.slide-card img').forEach((img) => {
+                img.addEventListener('click', () => {
+                    modalImg.src = img.src;
+                    modalImg.alt = img.alt;
+                    modal.classList.add('is-open');
+                });
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal || e.target === modalClose) {
+                    modal.classList.remove('is-open');
+                }
+            });
+
+            modalClose.addEventListener('click', () => {
+                modal.classList.remove('is-open');
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                    modal.classList.remove('is-open');
+                }
+            });
+        }());
+    </script>
+
+    <!-- Slide Modal Overlay -->
+    <div class="slide-modal" id="slideModal">
+        <button class="slide-modal-close" aria-label="Close">✕</button>
+        <img src="" alt="">
+    </div>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern RHEL Operations on Azure with Copilot — Red Hat Summit 2026</title>
+    <meta name="description" content="One prompt. Two blank VMs. A live app in minutes. Resources from Karl Abbott's Red Hat Summit 2026 session.">
+    <meta property="og:title" content="Modern RHEL Operations on Azure with Copilot">
+    <meta property="og:description" content="One prompt. Two blank VMs. A live app in minutes.">
+    <meta property="og:image" content="og-image.png">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#0d1117">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        a { color: #58a6ff; text-decoration: none; }
+        a:hover { color: #79c0ff; }
+        code {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.88em;
+            background: #161b22;
+            padding: 0.15em 0.45em;
+            border-radius: 4px;
+            border: 1px solid #30363d;
+        }
+
+        .wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* --- HERO --- */
+        .hero {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+            align-items: center;
+            padding: 2.5rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+            background:
+                radial-gradient(circle at top left, rgba(88, 166, 255, 0.08), transparent 50%);
+        }
+
+        .hero-left {
+            text-align: left;
+        }
+
+        .hero h1 {
+            font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+            font-weight: 700;
+            line-height: 1.15;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #58a6ff, #79c0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero .tagline {
+            font-size: 0.95rem;
+            color: #c9d1d9;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero .speaker-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .hero .headshot {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #30363d;
+            object-fit: cover;
+        }
+
+        .hero .speaker-info {
+            text-align: left;
+            font-size: 0.82rem;
+            color: #8b949e;
+        }
+
+        .hero .speaker-info strong {
+            color: #e6edf3;
+            display: block;
+            font-size: 0.92rem;
+        }
+
+        .hero .meta {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.75rem;
+            color: #8b949e;
+        }
+
+        .hero-right .feature-card {
+            margin: 0;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ee0000, #a30000);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        /* --- FEATURE CARD --- */
+        .feature {
+            margin: -2rem auto 0;
+            max-width: 700px;
+            padding: 0 2rem;
+        }
+
+        .feature-card {
+            background: #161b22;
+            border: 1px solid #58a6ff;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(88, 166, 255, 0.1);
+        }
+
+        .feature-card h2 {
+            font-size: 1.5rem;
+            color: #e6edf3;
+            margin-bottom: 0.6rem;
+        }
+
+        .feature-card p {
+            color: #8b949e;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .cta {
+            display: inline-block;
+            background: linear-gradient(135deg, #58a6ff, #79c0ff);
+            color: #0d1117;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.7rem 2rem;
+            border-radius: 6px;
+            transition: opacity 0.2s;
+        }
+
+        .cta:hover {
+            opacity: 0.9;
+            color: #0d1117;
+        }
+
+        .duration {
+            display: block;
+            margin-top: 0.75rem;
+            font-size: 0.78rem;
+            color: #8b949e;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+        }
+
+        /* --- SECTION HEADINGS --- */
+        .section-heading {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #e6edf3;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid #30363d;
+        }
+
+        /* --- CARD GRID --- */
+        .grid-section {
+            margin-top: 3.5rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+            display: block;
+            color: #e6edf3;
+        }
+
+        .card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-2px);
+            color: #e6edf3;
+        }
+
+        .card .video-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #0a0e14;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #30363d;
+            font-size: 2.5rem;
+            transition: color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card .video-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.2s;
+        }
+
+        .card:hover .video-thumb img {
+            opacity: 0.7;
+        }
+
+        .card .video-thumb .play-icon {
+            position: absolute;
+            font-size: 2.5rem;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .card:hover .video-thumb .play-icon {
+            opacity: 1;
+        }
+
+        .card-body {
+            padding: 1rem 1.15rem;
+        }
+
+        .card-body h3 {
+            font-size: 0.95rem;
+            color: #e6edf3;
+            margin-bottom: 0.4rem;
+        }
+
+        .card-body p {
+            font-size: 0.82rem;
+            color: #8b949e;
+            line-height: 1.5;
+        }
+
+        .tag {
+            display: inline-block;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.68rem;
+            color: #7ee787;
+            border: 1px solid #30363d;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+        }
+
+        .tag.booth { color: #f0883e; }
+
+        /* --- RESOURCE LIST --- */
+        .resources {
+            margin-top: 3.5rem;
+        }
+
+        .resource-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 0.9rem 1.15rem;
+            transition: border-color 0.2s;
+            color: #e6edf3;
+        }
+
+        .resource-link:hover {
+            border-color: #58a6ff;
+            color: #e6edf3;
+        }
+
+        .resource-link .icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            width: 1.8rem;
+            text-align: center;
+        }
+
+        .resource-link .info h3 {
+            font-size: 0.9rem;
+            color: #e6edf3;
+            margin-bottom: 0.15rem;
+        }
+
+        .resource-link .info p {
+            font-size: 0.78rem;
+            color: #8b949e;
+        }
+
+        .resource-link .arrow {
+            margin-left: auto;
+            color: #30363d;
+            font-size: 1.1rem;
+        }
+
+        .resource-link:hover .arrow {
+            color: #58a6ff;
+        }
+
+        /* --- FOOTER --- */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-top: 3.5rem;
+            border-top: 1px solid #30363d;
+            color: #8b949e;
+            font-size: 0.82rem;
+        }
+
+        .footer .closing-line {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.78rem;
+            color: #6e7681;
+            margin-top: 0.5rem;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 640px) {
+            .hero { grid-template-columns: 1fr; text-align: center; padding: 2rem 1.5rem; }
+            .hero-left { text-align: center; }
+            .hero .speaker-row { justify-content: center; }
+            .card-grid { grid-template-columns: 1fr; }
+            .feature-card { padding: 1.5rem; }
+            .wrapper { padding: 0 1.25rem; }
+        }
+    
+        /* --- Video Modal --- */
+        .video-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(1, 4, 9, 0.92);
+            backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-modal.is-open {
+            display: flex;
+        }
+
+        .video-modal-content {
+            width: 90vw;
+            max-width: 1100px;
+        }
+
+        .video-modal-content video {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid #30363d;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.6);
+            background: #000;
+        }
+
+        .video-modal-close {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: #161b22;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .video-modal-close:hover {
+            background: #58a6ff;
+            color: #0d1117;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+    <div class="hero-left">
+        <span class="badge">Red Hat Summit 2026</span>
+        <h1>Modern RHEL Operations on Azure with Copilot</h1>
+        <p class="tagline">The thing about handing a machine the keys to your infrastructure is that it feels, at first, like a small act. A prompt. A paragraph. You press Enter and walk to the window while it works, and for a few minutes you can almost convince yourself nothing has changed. But something has.</p>
+        <p class="tagline" style="margin-top: 0.5rem; font-size: 0.9rem; color: #8b949e;">On a Tuesday in Atlanta in May, I described exactly what I needed, and the machine built something real: a live application on RHEL 10 on Azure, while a room full of strangers joined in on their phones. Then something broke in production. Naturally, we asked the machine what went wrong.</p>
+        <div class="speaker-row">
+            <img class="headshot" src="karl.jpeg" alt="Karl Abbott">
+            <div class="speaker-info">
+                <strong>Karl Abbott</strong>
+                Product Manager, Microsoft · 16 years at Red Hat
+            </div>
+        </div>
+        <p class="meta">May 12, 2026 · Room B404 · Atlanta, GA</p>
+        <div class="feature-card" style="margin-top: 1.25rem; text-align: center;">
+            <h2>Experience the Session</h2>
+            <p>The full talk track with audio narration, slides, and embedded demos. Self-paced.</p>
+            <a href="walkthrough.html" class="cta">Experience the Session →</a>
+            <span class="duration">~12 min read · ~12 min audio · 3 demos</span>
+        </div>
+    </div>
+    <div class="hero-right">
+        <h3 style="font-size: 0.85rem; color: #8b949e; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; font-family: 'Cascadia Code', 'Fira Code', monospace;">Read & Explore</h3>
+        <div class="resource-list" style="gap: 0.5rem;">
+            <a href="https://learn.microsoft.com/en-us/azure/virtual-machines/linux/endorsed-distros" class="resource-link" title="Coming soon">
+                <span class="icon">🚀</span>
+                <div class="info">
+                    <h3>Try It Yourself</h3>
+                    <p>Copy-paste prompts for any <span style="color:#58a6ff; text-decoration: underline; text-underline-offset: 2px;">endorsed Linux distro</span> on Azure. Coming soon.</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://www.linkedin.com/pulse/ai-didnt-replace-my-work-changed-how-i-karl-abbott-eqbbc/" class="resource-link">
+                <span class="icon">📝</span>
+                <div class="info">
+                    <h3>Essay: AI Didn't Replace My Work</h3>
+                    <p>Essay on how AI changed the shape of the work.</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://www.linkedin.com/pulse/beauty-terror-age-ai-karl-abbott-lpl2c/" class="resource-link">
+                <span class="icon">📝</span>
+                <div class="info">
+                    <h3>Essay: Beauty Is Terror</h3>
+                    <p>What we lose when the output looks fine.</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://annievella.com/posts/the-heart-of-software-engineering-still-beats/" class="resource-link">
+                <span class="icon">📝</span>
+                <div class="info">
+                    <h3>The Heart of Software Engineering</h3>
+                    <p>Annie Vella — the developer-side mirror of this talk.</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://github.com/karlabbott/conference-bingo" class="resource-link">
+                <span class="icon">📦</span>
+                <div class="info">
+                    <h3>Conference Bingo App</h3>
+                    <p>The app deployed live on stage. Open source.</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://github.com/karlabbott/wordblitz-monitoring-ansible" class="resource-link">
+                <span class="icon">📦</span>
+                <div class="info">
+                    <h3>Monitoring Ansible Playbook</h3>
+                    <p>Generated by Copilot, codified in Ansible.</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://linkedin.com/in/karl-abbott" class="resource-link">
+                <span class="icon">💼</span>
+                <div class="info">
+                    <h3>Connect on LinkedIn</h3>
+                    <p>Karl Abbott — Productly Speaking podcast host.</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+            <a href="https://rhs.99b.org" class="resource-link">
+                <span class="icon">🎯</span>
+                <div class="info">
+                    <h3>rhs.99b.org</h3>
+                    <p>The original teaser site.</p>
+                </div>
+                <span class="arrow">→</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="wrapper">
+
+    <!-- DEMO VIDEOS -->
+    <section class="grid-section">
+        <h2 class="section-heading">From the Stage</h2>
+        <div class="card-grid">
+            <div data-video="https://www.youtube.com/embed/Dc_SR10cBAI?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" class="card" style="cursor:pointer;">
+                <div class="video-thumb"><img src="thumbs/demo1.jpg" alt="Video thumbnail"><span class="play-icon">▶</span></div>
+                <div class="card-body">
+                    <h3>Full Application Deployment</h3>
+                    <p>One prompt deploys PostgreSQL, Nginx, Flask, TLS, SELinux, and firewalld to two blank RHEL 10 VMs.</p>
+                    <span class="tag">10:38</span>
+                </div>
+            </div>
+            <div data-video="https://www.youtube.com/embed/VNBfZDtP97o?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" class="card" style="cursor:pointer;">
+                <div class="video-thumb"><img src="thumbs/demo2.jpg" alt="Video thumbnail"><span class="play-icon">▶</span></div>
+                <div class="card-body">
+                    <h3>Ansible Observability Pipeline</h3>
+                    <p>Azure Monitor Agent, Log Analytics, Data Collection Rules, and Managed Grafana deployed via Ansible.</p>
+                    <span class="tag">3:26</span>
+                </div>
+            </div>
+            <div data-video="https://www.youtube.com/embed/MiKhc3qxUZw?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" class="card" style="cursor:pointer;">
+                <div class="video-thumb"><img src="thumbs/demo3.jpg" alt="Video thumbnail"><span class="play-icon">▶</span></div>
+                <div class="card-body">
+                    <h3>Live Troubleshooting</h3>
+                    <p>Seven words: "My app feels really slow. Can you tell me why?" Copilot finds and fixes runaway queries.</p>
+                    <span class="tag">4:15</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BOOTH VIDEOS -->
+    <section class="grid-section">
+        <h2 class="section-heading">From the Booth</h2>
+        <div class="card-grid">
+            <div data-video="https://www.youtube.com/embed/jTH-wabaNrU?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" class="card" style="cursor:pointer;">
+                <div class="video-thumb"><img src="thumbs/booth-imagemode.jpg" alt="Video thumbnail"><span class="play-icon">▶</span></div>
+                <div class="card-body">
+                    <h3>RHEL Image Mode + Copilot</h3>
+                    <p>Copilot builds and deploys a bootable RHEL container image on Azure.</p>
+                    <span class="tag booth">3:23</span>
+                </div>
+            </div>
+            <div data-video="https://www.youtube.com/embed/MauneVwG7w8?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" class="card" style="cursor:pointer;">
+                <div class="video-thumb"><img src="thumbs/booth-perf.jpg" alt="Video thumbnail"><span class="play-icon">▶</span></div>
+                <div class="card-body">
+                    <h3>Linux Performance + Copilot</h3>
+                    <p>Copilot reads a Microsoft Learn document on network tunables and applies the optimizations to a live Linux VM.</p>
+                    <span class="tag booth">2:40</span>
+                </div>
+            </div>
+            <div data-video="https://www.youtube.com/embed/YCNdnw-4PZc?modestbranding=1&rel=0&color=white&iv_load_policy=3&autohide=1" class="card" style="cursor:pointer;">
+                <div class="video-thumb"><img src="thumbs/booth-behind.jpg" alt="Video thumbnail"><span class="play-icon">▶</span></div>
+                <div class="card-body">
+                    <h3>Behind the Demos</h3>
+                    <p>How the entire presentation was built with the same tool it demonstrates.</p>
+                    <span class="tag booth">2:47</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <p>Built by Karl Abbott · Red Hat Summit 2026 · May 12 · Atlanta, GA</p>
+    <p class="closing-line">The tool is GitHub Copilot CLI. The model is Claude Opus. The VMs were deleted by dinner.</p>
+</footer>
+
+
+<!-- VIDEO MODAL -->
+<div class="video-modal" id="videoModal">
+    <button class="video-modal-close" aria-label="Close">✕</button>
+    <div class="video-modal-content">
+        <iframe id="modalVideo" width="100%" style="aspect-ratio:16/9;" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+</div>
+<script>
+(function() {
+    const modal = document.getElementById('videoModal');
+    const video = document.getElementById('modalVideo');
+    const closeBtn = modal.querySelector('.video-modal-close');
+
+    document.querySelectorAll('.card[data-video]').forEach(card => {
+        card.addEventListener('click', () => {
+            video.src = card.dataset.video + '?autoplay=1';
+            modal.classList.add('is-open');
+        });
+    });
+
+    function closeModal() {
+        modal.classList.remove('is-open');
+        video.src = '';
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+    });
+}());
+</script>
+</body>
+</html>
